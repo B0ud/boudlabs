@@ -1,0 +1,10 @@
+cluster:
+  proxy:
+    disabled: true
+  network:
+    cni:
+      name: none # On installera Cilium manuellement
+  apiServer:
+    certSANs:
+      - 192.168.25.1
+      - 127.0.0.1
