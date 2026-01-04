@@ -74,7 +74,8 @@ Ce template **doit exister** sur Proxmox avant de lancer Tofu.
 **Pour Talos**, l'idéal est d'avoir une image Cloud-Init. Si vous clonez une VM qui a juste booté sur l'ISO, la configuration `ipconfig0` (IP statique) définie dans Terraform ne sera **PAS** prise en compte automatiquement, car l'ISO Talos standard n'utilise pas Cloud-Init par défaut.
 
 > [!TIP]
-> **Recommandation** : Utilisez une image générée avec `talosctl gen iso` ou `talosctl gen image` qui inclut déjà les configurations, ou assurez-vous que votre Template est configuré pour lire les metadata Cloud-Init (plateforme `nocloud`).
+> **Recommandation** : Utilisez le script de génération de Template "Factory" pour avoir une image compatible Cloud-Init.
+> **[Voir le guide : Création du Template Talos](talos_template.md)**
 
 ### Sécurité (State)
 Le fichier `terraform.tfstate` qui est créé après un `apply` contient l'état de votre infra, y compris certaines données sensibles. Il est exclu du Git (`.gitignore`). Gardez-le précieusement sur votre machine (ou configurez un backend distant sécurisé type S3/MinIO plus tard).
