@@ -19,10 +19,15 @@ terraform {
     }
     talos = {
       source  = "siderolabs/talos"
-      version = "0.10.0" # Vérifie la dernière version
+      version = "0.10.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "3.1.1"
     }
   }
 }
+
 provider "proxmox" {
   pm_api_url      = var.proxmox_api_url
   pm_user         = var.proxmox_user
@@ -32,6 +37,15 @@ provider "proxmox" {
 
 provider "talos" {
   # Configuration vide au départ, on la passera dans les ressources
+}
+
+provider "helm" {
+  kubernetes = {
+    host                   = talos_cluster_kubeconfig.kubeconfig.kubernetes_client_configuration.host
+    client_certificate     = base64decode(talos_cluster_kubeconfig.kubeconfig.kubernetes_client_configuration.client_certificate)
+    client_key             = base64decode(talos_cluster_kubeconfig.kubeconfig.kubernetes_client_configuration.client_key)
+    cluster_ca_certificate = base64decode(talos_cluster_kubeconfig.kubeconfig.kubernetes_client_configuration.ca_certificate)
+  }
 }
 
 # =================================================================
@@ -200,6 +214,61 @@ resource "talos_cluster_kubeconfig" "kubeconfig" {
     client_key         = local.talos_context.key
   }
   node = local.nodes["master-01"].ip
+}
+
+resource "helm_release" "cilium" {
+  name       = "cilium"
+  repository = "https://helm.cilium.io/"
+  chart      = "cilium"
+  version    = "1.18.5"
+  namespace  = "kube-system"
+
+  set = [
+    {
+      name  = "ipam.mode"
+      value = "kubernetes"
+    },
+    {
+      name  = "kubeProxyReplacement"
+      value = "true"
+    },
+    {
+      name  = "securityContext.capabilities.ciliumAgent"
+      value = "{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
+    },
+    {
+      name  = "securityContext.capabilities.cleanCiliumState"
+      value = "{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
+    },
+    {
+      name  = "cgroup.autoMount.enabled"
+      value = "false"
+    },
+    {
+      name  = "cgroup.hostRoot"
+      value = "/sys/fs/cgroup"
+    },
+    {
+      name  = "k8sServiceHost"
+      value = "localhost"
+    },
+    {
+      name  = "k8sServicePort"
+      value = "7445"
+    },
+    {
+      name  = "gatewayAPI.enabled"
+      value = "true"
+    },
+    {
+      name  = "gatewayAPI.enableAlpn"
+      value = "true"
+    },
+    {
+      name  = "gatewayAPI.enableAppProtocol"
+      value = "true"
+    }
+  ]
 }
 
 output "kubeconfig" {

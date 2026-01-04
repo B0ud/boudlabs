@@ -181,5 +181,87 @@ export TF_LOG_PATH=debug.log
 
 Une fois activé, relancez votre commande `tofu plan` ou `tofu apply`.
 
-> [!IMPORTANT]
 > **Attention au volume** : Le niveau `TRACE` génère énormément de texte. Pensez à désactiver les logs une fois le debug terminé (`$env:TF_LOG=""` ou `unset TF_LOG`).
+
+## 9. Installation CNI (Cilium)
+
+Pour gérer le réseau du cluster Kubernetes, nous utilisons **Cilium** installé via le provider Helm de Terraform.
+
+### 9.1 Configuration du Provider Helm (v3)
+
+**Important** : La version 3.x du provider Helm utilise une syntaxe spécifique. L'argument `kubernetes` doit être défini comme un attribut (avec un `=`) et non comme un bloc.
+
+```hcl
+provider "helm" {
+  kubernetes = {
+    host                   = ...
+    client_certificate     = ...
+    client_key             = ...
+    cluster_ca_certificate = ...
+  }
+}
+```
+
+### 9.2 Ressource `helm_release`
+
+Nous déployons Cilium avec des options spécifiques pour Talos (IPAM Kubernetes, KubeProxy Replacement, Gateway API).
+Pour le provider v3, il est recommandé d'utiliser la syntaxe `set = [...]` (liste d'objets) plutôt que des blocs `set {}` répétés.
+
+**Extrait de configuration (`main.tf`) :**
+
+```hcl
+resource "helm_release" "cilium" {
+  name       = "cilium"
+  repository = "https://helm.cilium.io/"
+  chart      = "cilium"
+  version    = "1.18.5" # Ou version plus récente
+  namespace  = "kube-system"
+
+  set = [
+    {
+      name  = "ipam.mode"
+      value = "kubernetes"
+    },
+    {
+      name  = "kubeProxyReplacement"
+      value = "true"
+    },
+    {
+      name  = "securityContext.capabilities.ciliumAgent"
+      value = "{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
+    },
+    {
+      name  = "securityContext.capabilities.cleanCiliumState"
+      value = "{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
+    },
+    {
+      name  = "cgroup.autoMount.enabled"
+      value = "false"
+    },
+    {
+      name  = "cgroup.hostRoot"
+      value = "/sys/fs/cgroup"
+    },
+    {
+      name  = "k8sServiceHost"
+      value = "localhost"
+    },
+    {
+      name  = "k8sServicePort"
+      value = "7445"
+    },
+    {
+      name  = "gatewayAPI.enabled"
+      value = "true"
+    },
+    {
+      name  = "gatewayAPI.enableAlpn"
+      value = "true"
+    },
+    {
+      name  = "gatewayAPI.enableAppProtocol"
+      value = "true"
+    }
+  ]
+}
+```
