@@ -79,3 +79,39 @@ Ce template **doit exister** sur Proxmox avant de lancer Tofu.
 
 ### Sécurité (State)
 Le fichier `terraform.tfstate` qui est créé après un `apply` contient l'état de votre infra, y compris certaines données sensibles. Il est exclu du Git (`.gitignore`). Gardez-le précieusement sur votre machine (ou configurez un backend distant sécurisé type S3/MinIO plus tard).
+
+## 6. Spécificités de Configuration (Provider Telmate)
+
+Voici les configurations spécifiques requises pour le provider `telmate/proxmox` (v3.0.x) afin d'éviter les erreurs courantes.
+
+### Cloud-Init
+L'argument `cloudinit_cdrom_storage` est obsolète. Utilisez un bloc `disk` dédié de type `cloudinit` :
+```hcl
+disk {
+  slot    = "ide2"
+  type    = "cloudinit"
+  storage = "local"
+}
+```
+
+### Disques
+Le stockage principal doit spécifier un slot (ex: `scsi0`) et le type `disk` :
+```hcl
+disk {
+  slot    = "scsi0"
+  type    = "disk"
+  storage = "local"
+  size    = "100G"
+}
+```
+
+### CPU
+Les cœurs doivent être définis dans un bloc `cpu`, l'argument `cores` racine est déprécié :
+```hcl
+cpu {
+  cores = 4
+}
+```
+
+### Boot
+Pour démarrer la VM à la création, utilisez `start_at_node_boot = true` (remplace `onboot`).
