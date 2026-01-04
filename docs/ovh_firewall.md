@@ -13,7 +13,10 @@ La stratégie est stricte : **Tout refuser par défaut**, sauf le trafic explici
 | **2** | `Autoriser` | ICMP | Tout | - | Autorise le Ping (pratique pour le monitoring/test). |
 | **3** | `Autoriser` | UDP | Tout | `51820` | **WireGuard**. La seule porte d'entrée pour l'administration. |
 | **4** | `Autoriser` | TCP | Tout | `22` | **Secours SSH**. À désactiver/supprimer une fois le VPN validé. |
+| **5** | `Autoriser` | UDP | Tout (Source Port 123) | - | **NTP**. Synchronisation horaire (Vital pour Talos/K8s). |
 | **19** | `Refuser` | IPv4 | Tout | - | **Bloque tout le reste** (Port 8006 Proxmox, Port 80, Scanners, etc.). |
+
+![Configuration Firewall OVH avec NTP](img/ovh_ntp.png)
 
 ## Notes Importantes
 

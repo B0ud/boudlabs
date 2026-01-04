@@ -20,11 +20,15 @@ Créez le script `/root/firewall.sh` avec le contenu suivant.
 # CONFIGURATION
 # ====================================================
 PUB_IF="vmbr0"           # Interface publique (Pont vers Internet)
-VM_IF="vmbr1"            # Interface privée des VMs (si existante) ou interface interne
+VM_IF="vmbr1"            # Interface privée des VMs
 WG_IF="wg0"              # Interface WireGuard
 WG_PORT="51820"          # Port UDP WireGuard
 VM_NET="192.168.50.0/24" # Sous-réseau des VMs
 WG_NET="10.0.100.0/24"   # Sous-réseau VPN
+
+# [MODIF CRITIQUE] ACTIVATION DU ROUTAGE NOYAU
+# Sans ça, les règles FORWARD ne servent à rien !
+echo 1 > /proc/sys/net/ipv4/ip_forward
 
 # ====================================================
 # 1. NETTOYAGE (RAZ)
@@ -46,47 +50,51 @@ ip6tables -t mangle -F
 # ====================================================
 # 2. POLITIQUES PAR DÉFAUT
 # ====================================================
-# IPv4 : On bloque tout en entrée/traversée, on autorise la sortie
+# IPv4
 iptables -P INPUT DROP
 iptables -P FORWARD DROP
 iptables -P OUTPUT ACCEPT
 
-# IPv6 : BLOCAGE TOTAL (Kill Switch)
-# On empêche même le serveur de sortir en IPv6 pour éviter les fuites
+# IPv6 : [MODIF] ON AUTORISE LA SORTIE
+# On bloque tout ce qui rentre (pas de serveurs exposés)
+# Mais on autorise le serveur à sortir (pour curl, apt update, etc.)
 ip6tables -P INPUT DROP
 ip6tables -P FORWARD DROP
-ip6tables -P OUTPUT DROP
+ip6tables -P OUTPUT ACCEPT 
 
 # ====================================================
 # 3. EXCEPTION SYSTÈME (Localhost)
 # ====================================================
-# Vital pour le fonctionnement interne de Linux
 iptables -A INPUT -i lo -j ACCEPT
-# Pour IPv6, on autorise UNIQUEMENT le loopback (::1) pour ne pas casser le système
 ip6tables -A INPUT -i lo -j ACCEPT
+# Pas besoin de règle OUTPUT lo car policy est ACCEPT, mais on peut laisser pour la forme
 ip6tables -A OUTPUT -o lo -j ACCEPT
 
 # ====================================================
 # 4. RÈGLES IPv4 - ACCÈS PUBLIC
 # ====================================================
-# Autoriser les connexions déjà établies (réponses serveur)
+# Connexions établies
 iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-# Autoriser le Ping (Pratique pour le monitoring OVH)
-iptables -A INPUT -p icmp -j ACCEPT
+# [MODIF] IPv6 : On autorise le retour des paquets (pour que curl reçoive la réponse)
+ip6tables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-# Autoriser WireGuard (UDP)
+# Autoriser le Ping (ICMP)
+iptables -A INPUT -p icmp -j ACCEPT
+# [MODIF] Ping IPv6 (Optionnel mais recommandé pour le debug réseau)
+ip6tables -A INPUT -p ipv6-icmp -j ACCEPT
+
+# Autoriser WireGuard
 iptables -A INPUT -p udp --dport $WG_PORT -j ACCEPT
 
-# Autoriser SSH (TCP 22) - SECOURS
-# Une fois ton VPN validé, commente la ligne ci-dessous avec un #
+# Autoriser SSH
 iptables -A INPUT -p tcp --dport 22 -j ACCEPT
 
 # ====================================================
 # 5. RÈGLES IPv4 - ROUTAGE & NAT (VMs/VPN)
 # ====================================================
 
-# A. Confiance VPN : Le VPN a accès à l'hôte (SSH, Proxmox GUI 8006)
+# A. Confiance VPN
 iptables -A INPUT -i $WG_IF -j ACCEPT
 
 # B. Communication VPN <-> VMs
@@ -94,16 +102,18 @@ iptables -A FORWARD -i $WG_IF -o $VM_IF -j ACCEPT
 iptables -A FORWARD -i $VM_IF -o $WG_IF -j ACCEPT
 
 # C. Accès Internet pour les VMs (NAT)
+# Forwarding
 iptables -A FORWARD -i $VM_IF -o $PUB_IF -j ACCEPT
 iptables -A FORWARD -i $PUB_IF -o $VM_IF -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+# Masquerade (NAT)
 iptables -t nat -A POSTROUTING -s $VM_NET -o $PUB_IF -j MASQUERADE
 
-# D. Accès Internet pour le VPN (NAT) - Optionnel
+# D. Accès Internet pour le VPN (NAT)
 iptables -A FORWARD -i $WG_IF -o $PUB_IF -j ACCEPT
 iptables -A FORWARD -i $PUB_IF -o $WG_IF -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 iptables -t nat -A POSTROUTING -s $WG_NET -o $PUB_IF -j MASQUERADE
 
-echo "Firewall IPv4 appliqué et IPv6 verrouillé."
+echo "Firewall appliqué : IPv4 Routé + IPv6 Client Only (Sortie OK, Entrée Bloquée)."
 ```
 
 Rendre le script exécutable :
