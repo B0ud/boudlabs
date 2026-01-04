@@ -53,5 +53,6 @@ Desktop.ini
 
 # IDEs
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
 *.sublime-workspace

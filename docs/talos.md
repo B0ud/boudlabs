@@ -2,6 +2,11 @@
 
 Talos Linux est un OS minimaliste et immuable pour Kubernetes. Il tourne entièrement en RAM.
 
+> [!TIP]
+> **Setup Avancé / GitOps**
+> Pour une gestion déclarative recommandée (avec Talhelper et SOPS), consultez le guide dédié : **[Guide Talhelper & SOPS](talos_talhelper.md)**.
+> La méthode ci-dessous décrit l'approche manuelle standard.
+
 ## 1. Création de la VM dans Proxmox
 
 1. **Télécharger l'ISO** : Récupérer la dernière image `metal-amd64.iso` sur le GitHub de [siderolabs/talos](https://github.com/siderolabs/talos/releases).

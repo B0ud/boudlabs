@@ -1,0 +1,76 @@
+# talconfig.yaml
+clusterName: proxmox-cluster
+talosVersion: v1.12.0
+kubernetesVersion: v1.34.0
+
+# L'URL d'accès au cluster (VIP)
+endpoint: https://192.168.50.100:6443
+
+# Réseaux internes (Standards)
+clusterPodNets:
+  - 10.244.0.0/16
+clusterSvcNets:
+  - 10.96.0.0/12
+
+# Désactivation du CNI par défaut (pour installer Cilium ensuite)
+cniConfig:
+  name: none
+
+# Patchs globaux (S'appliquent à tous les nœuds)
+patches:
+  - |-
+    machine:
+      network:
+        nameservers:
+          - 1.1.1.1
+      # Activation du module nécessaire pour le réseau K8s (br_netfilter)
+      kernel:
+        modules:
+          - name: br_netfilter
+            parameters:
+              - bridge-nf-call-iptables=1
+
+# Config de la VIP (uniquement sur les Masters)
+controlPlane:
+  patches:
+    - |-
+      machine:
+        network:
+          interfaces:
+            - interface: eth0
+              vip:
+                ip: 192.168.50.100
+
+# Définition des nœuds
+nodes:
+  # --- CONTROL PLANES (MASTERS) ---
+  - hostname: master-01
+    ipAddress: 192.168.50.110
+    controlPlane: true
+    installDisk: /dev/sda
+
+  - hostname: master-02
+    ipAddress: 192.168.50.111
+    controlPlane: true
+    installDisk: /dev/sda
+
+  - hostname: master-03
+    ipAddress: 192.168.50.112
+    controlPlane: true
+    installDisk: /dev/sda
+
+  # --- WORKERS ---
+  - hostname: worker-01
+    ipAddress: 192.168.50.120
+    controlPlane: false
+    installDisk: /dev/sda
+
+  - hostname: worker-02
+    ipAddress: 192.168.50.121
+    controlPlane: false
+    installDisk: /dev/sda
+
+  - hostname: worker-03
+    ipAddress: 192.168.50.122
+    controlPlane: false
+    installDisk: /dev/sda
