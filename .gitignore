@@ -24,6 +24,7 @@ worker*.yaml
 # Private Keys
 *.key
 *.priv
+*.key.txt
 
 # Public Keys (Optional: keep if you want to share them publically, exclude if private)
 # *.pub
@@ -54,5 +55,5 @@ Desktop.ini
 # IDEs
 .idea/
 .vscode/*
-!.vscode/settings.json
+.vscode/settings.json
 *.sublime-workspace
