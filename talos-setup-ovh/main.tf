@@ -56,8 +56,22 @@ resource "proxmox_vm_qemu" "talos_nodes" {
   target_node = local.target_node
   clone       = local.template_name
 
+  # C'est ce bloc qui active l'écran pour la console VNC
+  vga {
+    type = "std"
+  }
+
+  # Tu peux garder ça si tu veux, ou l'enlever. 
+  # Le laisser permet d'avoir le VNC ET les logs série si besoin.
+  serial {
+    id   = 0
+    type = "socket"
+  }
+
   # Configuration Hardware
-  cores  = each.value.core
+  cpu {
+    cores = each.value.core
+  }
   memory = each.value.mem
   scsihw = "virtio-scsi-pci"
   boot   = "order=scsi0"
@@ -65,13 +79,15 @@ resource "proxmox_vm_qemu" "talos_nodes" {
 
   # Disque dur
   disk {
+    slot    = "scsi0"
     storage = "local" # Ou "local", selon ton stockage
-    type    = "scsi"
+    type    = "disk"
     size    = "100G" # Taille du disque
   }
 
   # Réseau (Pont vmbr1)
   network {
+    id     = 0
     model  = "virtio"
     bridge = "vmbr1"
   }
@@ -79,10 +95,14 @@ resource "proxmox_vm_qemu" "talos_nodes" {
   # ==========================================
   # CLOUD-INIT (C'est ça qui remplace ta config manuelle)
   # ==========================================
+
+  # 👇 AJOUTE CETTE LIGNE OBLIGATOIRE 👇
+  cloudinit_cdrom_storage = "local"
+
   os_type    = "cloud-init"
   ipconfig0  = "ip=${each.value.ip}/24,gw=${local.gateway}"
   nameserver = "1.1.1.1"
 
   # Important pour que Talos attende bien d'être up
-  onboot = true
+  start_at_node_boot = true
 }
