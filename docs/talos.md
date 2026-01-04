@@ -9,6 +9,12 @@ Talos Linux est un OS minimaliste et immuable pour Kubernetes. Il tourne entièr
 
 ## 1. Création de la VM dans Proxmox
 
+> [!TIP]
+> **Automatisation (Terraform/OpenTofu)**
+> Plutôt que de créer les VMs à la main comme décrit ci-dessous, nous recommandons d'utiliser Terraform.
+> Voir le guide : **[Provisioning avec OpenTofu](terraform_proxmox.md)**.
+
+### Méthode Manuelle
 1. **Télécharger l'ISO** : Récupérer la dernière image `metal-amd64.iso` sur le GitHub de [siderolabs/talos](https://github.com/siderolabs/talos/releases).
 2. **Uploader l'ISO** dans Proxmox.
 3. **Créer une VM** :
