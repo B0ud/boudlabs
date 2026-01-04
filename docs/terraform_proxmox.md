@@ -115,3 +115,71 @@ cpu {
 
 ### Boot
 Pour démarrer la VM à la création, utilisez `start_at_node_boot = true` (remplace `onboot`).
+
+## 7. Accès au Cluster (Post-Installation)
+
+Une fois le `tofu apply` terminé avec succès, le cluster est prêt. Cependant, les fichiers de connexion sont stockés dans les "outputs" de Terraform et sont marqués comme sensibles (masqués).
+
+### 7.1 Récupérer les fichiers de configuration
+
+Exécutez ces commandes dans votre terminal (dossier `talos-setup-ovh`) pour extraire les fichiers :
+
+```bash
+# Extraire le kubeconfig (pour kubectl)
+tofu output -raw kubeconfig > kubeconfig
+
+# Extraire le talosconfig (pour talosctl)
+tofu output -raw talosconfig > talosconfig
+```
+
+### 7.2 Configurer l'environnement
+
+Pour utiliser ces fichiers sans avoir à les spécifier à chaque commande (`--kubeconfig ...`), exportez les variables d'environnement :
+
+```bash
+# Linux / macOS / Git Bash
+export KUBECONFIG=./kubeconfig
+export TALOSCONFIG=./talosconfig
+
+# PowerShell
+$env:KUBECONFIG="$PWD\kubeconfig"
+$env:TALOSCONFIG="$PWD\talosconfig"
+```
+
+### 7.3 Vérifier l'accès
+
+1.  **Kubernetes** (Vérifier que les nœuds sont Ready) :
+    ```bash
+    kubectl get nodes
+    ```
+
+2.  **Talos** (Accéder au Dashboard d'un nœud, ex: master-01) :
+    ```bash
+    # Remplacez l'IP par celle de votre master-01
+    talosctl -n 192.168.50.110 dashboard
+    ```
+
+## 8. Debugging & Logs
+
+Si `tofu apply` échoue ou semble bloqué, vous pouvez activer les logs détaillés pour comprendre ce qui se passe (appels API, erreurs masquées, etc.).
+
+### Activer les logs
+
+Définissez la variable d'environnement `TF_LOG`. Les niveaux possibles sont : `INFO`, `WARN`, `ERROR`, `DEBUG`, `TRACE` (le plus verbeux).
+
+```powershell
+# PowerShell
+$env:TF_LOG="DEBUG"
+$env:TF_LOG_PATH="debug.log" # Optionnel : pour écire dans un fichier
+```
+
+```bash
+# Bash
+export TF_LOG=DEBUG
+export TF_LOG_PATH=debug.log
+```
+
+Une fois activé, relancez votre commande `tofu plan` ou `tofu apply`.
+
+> [!IMPORTANT]
+> **Attention au volume** : Le niveau `TRACE` génère énormément de texte. Pensez à désactiver les logs une fois le debug terminé (`$env:TF_LOG=""` ou `unset TF_LOG`).
