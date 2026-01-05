@@ -24,9 +24,12 @@ L'objectif est de sécuriser l'accès au serveur en n'exposant aucun port de man
    - Configuration des pairs (Clients)
    - Règles de Pare-feu
 3. [Déploiement de Talos Linux](./docs/talos.md)
-   - Création de la VM
-   - Configuration (MachineConfig)
-   - Bootstrap du cluster
+   - [Mise à jour Cluster (Talos & K8s)](./docs/cluster_upgrades.md)
+   - [Dépannage & Commandes utiles](./docs/talos_talhelper.md)
 4. [Intégration IA / MCP (Model Context Protocol)](./docs/mcp_proxmox_integration.md)
    - [Intégration Proxmox](./docs/mcp_proxmox_integration.md)
    - [Intégration Kubernetes & Talos](./docs/mcp_k8s_talos_integration.md)
+
+## Autres Ressources
+- [Modèle de Configuration Talos](./docs/talos_template.md)
+- [Déploiement Terraform (Détails)](./docs/terraform_proxmox.md)
