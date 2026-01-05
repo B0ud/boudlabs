@@ -27,3 +27,6 @@ L'objectif est de sécuriser l'accès au serveur en n'exposant aucun port de man
    - Création de la VM
    - Configuration (MachineConfig)
    - Bootstrap du cluster
+4. [Intégration IA / MCP (Model Context Protocol)](./docs/mcp_proxmox_integration.md)
+   - [Intégration Proxmox](./docs/mcp_proxmox_integration.md)
+   - [Intégration Kubernetes & Talos](./docs/mcp_k8s_talos_integration.md)
