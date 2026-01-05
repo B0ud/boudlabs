@@ -45,7 +45,7 @@ Talhelper peut générer un fichier de secrets chiffré pour vous.
 ```bash
 # Définit la variable d'environnement pour que SOPS trouve la clé
 # IMPORTANT SUR WINDOWS (Bash) : Utilisez le chemin ABSOLU avec des slashs '/'
-export SOPS_AGE_KEY_FILE="d:/Mehdi/Documents/BoudLabs/talos-automated-install/age.key.txt"
+export SOPS_AGE_KEY_FILE="d:/Mehdi/Documents/BoudLabs/talos/age.key.txt"
 
 # Génère et chiffre les secrets
 talhelper gensecret > talsecret.sops.yaml
@@ -94,5 +94,5 @@ Cela va créer un dossier `clusterconfig/` (ou les fichiers à la racine selon c
 Forcer le chemin absolu avec des forward slashes `/`.
 
 ```bash
-export SOPS_AGE_KEY_FILE="d:/Mehdi/Documents/BoudLabs/talos-automated-install/age.key.txt"
+export SOPS_AGE_KEY_FILE="d:/Mehdi/Documents/BoudLabs/talos/age.key.txt"
 ```

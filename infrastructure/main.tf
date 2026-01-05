@@ -144,14 +144,15 @@ resource "proxmox_vm_qemu" "talos_nodes" {
 resource "terraform_data" "talhelper_gen" {
   # Si talconfig.yaml change, on régénère tout
   triggers_replace = [
-    filesha256("talconfig.yaml")
+    filesha256("../talos/talconfig.yaml")
   ]
 
   provisioner "local-exec" {
-    command = "talhelper genconfig"
+    command = "talhelper genconfig -c ../talos/talconfig.yaml -s ../talos/talsecret.sops.yaml -o ../talos/clusterconfig"
     environment = {
-      SOPS_AGE_KEY_FILE = "d:/Mehdi/Documents/BoudLabs/talos-setup-ovh/age.key.txt"
+      SOPS_AGE_KEY_FILE = abspath("../talos/age.key.txt")
     }
+    # Working dir stays default (infrastructure), we use relative paths in command
   }
 }
 
@@ -162,13 +163,13 @@ data "local_file" "machine_configs" {
 
   depends_on = [terraform_data.talhelper_gen]
   # Assure-toi que talhelper génère bien les noms sous la forme : proxmox-cluster-<nom-du-noeud>.yaml
-  filename = "${path.module}/clusterconfig/proxmox-cluster-${each.key}.yaml"
+  filename = "${path.module}/../talos/clusterconfig/proxmox-cluster-${each.key}.yaml"
 }
 
 # On charge le talosconfig (nécessaire pour parler au cluster)
 data "local_file" "talosconfig" {
   depends_on = [terraform_data.talhelper_gen]
-  filename   = "${path.module}/clusterconfig/talosconfig"
+  filename   = "${path.module}/../talos/clusterconfig/talosconfig"
 }
 
 # 3. Application de la configuration (remplace "taloctl apply-config")
@@ -223,51 +224,8 @@ resource "helm_release" "cilium" {
   version    = "1.18.5"
   namespace  = "kube-system"
 
-  set = [
-    {
-      name  = "ipam.mode"
-      value = "kubernetes"
-    },
-    {
-      name  = "kubeProxyReplacement"
-      value = "true"
-    },
-    {
-      name  = "securityContext.capabilities.ciliumAgent"
-      value = "{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}"
-    },
-    {
-      name  = "securityContext.capabilities.cleanCiliumState"
-      value = "{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}"
-    },
-    {
-      name  = "cgroup.autoMount.enabled"
-      value = "false"
-    },
-    {
-      name  = "cgroup.hostRoot"
-      value = "/sys/fs/cgroup"
-    },
-    {
-      name  = "k8sServiceHost"
-      value = "localhost"
-    },
-    {
-      name  = "k8sServicePort"
-      value = "7445"
-    },
-    {
-      name  = "gatewayAPI.enabled"
-      value = "true"
-    },
-    {
-      name  = "gatewayAPI.enableAlpn"
-      value = "true"
-    },
-    {
-      name  = "gatewayAPI.enableAppProtocol"
-      value = "true"
-    }
+  values = [
+    file("${path.module}/../kubernetes/cilium/values.yaml")
   ]
 }
 

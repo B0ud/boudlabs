@@ -18,11 +18,13 @@ Nous utilisons l'Infrastructure as Code (IaC) pour créer et gérer les VMs Prox
 
 ## 2. Structure du Projet
 
-Le code Terraform se trouve dans le dossier `talos-automated-install/` (ou racine selon setup).
+Le code est séparé en deux dossiers pour suivre les bonnes pratiques (Infrastructure vs Configuration) :
+**`infrastructure/`** : Code Terraform pour provisionner les VMs Proxmox.
+**`talos/`** : Configuration Talos (Talhelper) pour générer les secrets et la config Kubernetes.
 
-*   `main.tf` : Définition de l'infrastructure (Provider Proxmox, Ressources VMs).
-*   `terraform.tfvars` : **Ficher Secret** contenant vos identifiants. **NE JAMAIS LE COMMITTER**.
-*   `.gitignore` : Configuré pour ignorer `.tfvars` et `.tfstate`.
+*   `infrastructure/main.tf` : Définition de l'infrastructure.
+*   `infrastructure/terraform.tfvars` : **Ficher Secret** contenant vos identifiants. **NE JAMAIS LE COMMITTER**.
+*   `talos/talconfig.yaml` : Configuration unique de votre cluster Talos.
 
 ## 3. Configuration Initiale
 
@@ -122,7 +124,7 @@ Une fois le `tofu apply` terminé avec succès, le cluster est prêt. Cependant,
 
 ### 7.1 Récupérer les fichiers de configuration
 
-Exécutez ces commandes dans votre terminal (dossier `talos-automated-install`) pour extraire les fichiers :
+Exécutez ces commandes dans votre terminal (dossier `infrastructure`) pour extraire les fichiers :
 
 ```bash
 # Extraire le kubeconfig (pour kubectl)
