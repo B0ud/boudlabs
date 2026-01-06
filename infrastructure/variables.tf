@@ -1,3 +1,4 @@
+# Test variable for hook verification
 variable "proxmox_password" {
   type      = string
   sensitive = true # Empêche Terraform d'afficher le mot de passe dans les logs
