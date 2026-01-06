@@ -22,8 +22,12 @@ Le code est séparé en deux dossiers pour suivre les bonnes pratiques (Infrastr
 **`infrastructure/`** : Code Terraform pour provisionner les VMs Proxmox.
 **`talos/`** : Configuration Talos (Talhelper) pour générer les secrets et la config Kubernetes.
 
-*   `infrastructure/main.tf` : Définition de l'infrastructure.
-*   `infrastructure/terraform.tfvars` : **Ficher Secret** contenant vos identifiants. **NE JAMAIS LE COMMITTER**.
+*   `infrastructure/main.tf` : Définition des **resources** principales (VMs Proxmox, Talos bootstrap, Helm release). C'est le cœur de l'infrastructure.
+*   `infrastructure/variables.tf` : Déclaration de toutes les **variables** d'entrée (credentials, noms, etc.). Permet de paramétrer le code sans le modifier.
+*   `infrastructure/outputs.tf` : Définition des **sorties** (valeurs retournées après l'exécution), comme le `kubeconfig` ou les IPs des nœuds.
+*   `infrastructure/providers.tf` : Configuration des **providers** Terraform (Proxmox, Talos, Helm, Flux). C'est ici qu'on configure les accès aux APIs externes.
+*   `infrastructure/versions.tf` : Fixe les **versions** de Terraform et des providers pour assurer la stabilité et éviter les breaking changes.
+*   `infrastructure/terraform.tfvars` : **Ficher Secret** contenant les valeurs réelles des variables. **NE JAMAIS LE COMMITTER**.
 *   `talos/talconfig.yaml` : Configuration unique de votre cluster Talos.
 
 ## 3. Configuration Initiale
