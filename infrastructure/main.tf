@@ -84,6 +84,16 @@ resource "proxmox_vm_qemu" "talos_nodes" {
 
   # Important pour que Talos attende bien d'être up
   start_at_node_boot = true
+
+  lifecycle {
+    ignore_changes = [
+      disk,
+      network,
+      startup_shutdown,
+      boot,
+      ipconfig0,
+    ]
+  }
 }
 
 # =================================================================
@@ -197,3 +207,15 @@ check "cluster_health" {
     error_message = "L'API Kubernetes n'est pas joignable (Status différent de 200/401/403). VIP: 192.168.50.100"
   }
 }
+
+#resource "flux_bootstrap_git" "this" {
+#  depends_on = [helm_release.cilium]
+#
+#
+#  path = abspath("${path.module}/../gitops")
+#
+#  components_extra = [
+#    "image-reflector-controller",
+#    "image-automation-controller",
+#  ]
+#}
