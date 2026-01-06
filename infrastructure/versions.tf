@@ -12,5 +12,9 @@ terraform {
       source  = "hashicorp/helm"
       version = "3.1.1"
     }
+    flux = {
+      source  = "fluxcd/flux"
+      version = "1.7.6"
+    }
   }
 }
