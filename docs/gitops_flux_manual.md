@@ -46,6 +46,7 @@ flux bootstrap github `
   --repository=boudlabs `
   --branch=main `
   --path=gitops/0_fluxcd `
+  --components-extra=image-reflector-controller,image-automation-controller,source-watcher `
   --personal
 ```
 
