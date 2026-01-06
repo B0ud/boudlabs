@@ -1,53 +1,3 @@
-variable "proxmox_password" {
-  type      = string
-  sensitive = true # Empêche Terraform d'afficher le mot de passe dans les logs
-}
-
-variable "proxmox_user" {
-  type = string
-}
-
-variable "proxmox_api_url" {
-  type = string
-}
-
-terraform {
-  required_providers {
-    proxmox = {
-      source  = "telmate/proxmox"
-      version = "3.0.2-rc07" # Version stable courante
-    }
-    talos = {
-      source  = "siderolabs/talos"
-      version = "0.10.0"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "3.1.1"
-    }
-  }
-}
-
-provider "proxmox" {
-  pm_api_url      = var.proxmox_api_url
-  pm_user         = var.proxmox_user
-  pm_password     = var.proxmox_password
-  pm_tls_insecure = true
-}
-
-provider "talos" {
-  # Configuration vide au départ, on la passera dans les ressources
-}
-
-provider "helm" {
-  kubernetes = {
-    host                   = talos_cluster_kubeconfig.kubeconfig.kubernetes_client_configuration.host
-    client_certificate     = base64decode(talos_cluster_kubeconfig.kubeconfig.kubernetes_client_configuration.client_certificate)
-    client_key             = base64decode(talos_cluster_kubeconfig.kubeconfig.kubernetes_client_configuration.client_key)
-    cluster_ca_certificate = base64decode(talos_cluster_kubeconfig.kubeconfig.kubernetes_client_configuration.ca_certificate)
-  }
-}
-
 # =================================================================
 # LISTE DES NŒUDS (C'est ici que tu ajoutes/enlèves des VMs)
 # =================================================================
@@ -227,26 +177,6 @@ resource "helm_release" "cilium" {
   values = [
     file("${path.module}/../kubernetes/cilium/values.yaml")
   ]
-}
-
-output "kubeconfig" {
-  value     = talos_cluster_kubeconfig.kubeconfig.kubeconfig_raw
-  sensitive = true
-}
-
-output "talosconfig" {
-  value     = data.local_file.talosconfig.content
-  sensitive = true
-}
-
-output "control_plane_vip" {
-  description = "L'IP virtuelle pour accéder à l'API Server"
-  value       = "https://192.168.50.100:6443"
-}
-
-output "nodes_configured" {
-  description = "Liste des noeuds provisionnés"
-  value       = [for name, config in local.nodes : "${name} - ${config.ip}"]
 }
 
 check "cluster_health" {
