@@ -4,3 +4,4 @@ resources:
   - https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.4.1/standard-install.yaml
   - apps-of-apps-git-sync.yaml
   - cert-manager-git-sync.yaml
+  - gateway_cillium-git-sync.yaml
