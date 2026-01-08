@@ -14,9 +14,15 @@ secretGenerator:
       disableNameSuffixHash: true
     namespace: networking
     type: kubernetes.io/tls
+    files:
+      - tls.crt
+      - tls.key
 
   - name: default-private-cert
     options:
       disableNameSuffixHash: true
     namespace: networking
     type: kubernetes.io/tls
+    files:
+      - tls.crt
+      - tls.key
