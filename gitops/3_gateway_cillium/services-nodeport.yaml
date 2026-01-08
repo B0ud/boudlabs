@@ -1,0 +1,46 @@
+# --- SERVICE PUBLIC (Internet) ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cilium-gateway-public-nodeport
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    # Label standard de la Gateway API Cilium pour la gateway publique
+    gateway.networking.k8s.io/gateway-name: gateway-public
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 30080 # <--- Entrée HTTP Public
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      nodePort: 30443 # <--- Entrée HTTPS Public
+      protocol: TCP
+
+---
+# --- SERVICE PRIVÉ (WireGuard) ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cilium-gateway-private-nodeport
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    # Label pour la gateway privée
+    gateway.networking.k8s.io/gateway-name: gateway-privee
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 31080 # <--- Entrée HTTP Privée
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      nodePort: 31443 # <--- Entrée HTTPS Privée
+      protocol: TCP

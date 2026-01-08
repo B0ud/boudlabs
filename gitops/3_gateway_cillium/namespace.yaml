@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: networking
+  labels:
+    # Important pour que Cilium puisse gérer le réseau sans être bloqué par Talos
+    pod-security.kubernetes.io/enforce: privileged

@@ -1,0 +1,31 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway-public
+  namespace: default
+spec:
+  gatewayClassName: cilium
+  listeners:
+    # --- ÉCOUTE HTTP (Port 80) ---
+    - name: http
+      port: 80
+      protocol: HTTP
+      hostname: "*" # Accepte tout (le filtrage se fera via HAProxy ou HTTPRoute)
+      allowedRoutes:
+        namespaces:
+          from: All
+
+    # --- ÉCOUTE HTTPS (Port 443) ---
+    - name: https
+      port: 443
+      protocol: HTTPS
+      hostname: "*"
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        # Certificat par défaut (Fallback).
+        # Important : Crée ce secret (même vide/bidon) pour que la Gateway démarre
+        certificateRefs:
+          - name: default-public-cert
