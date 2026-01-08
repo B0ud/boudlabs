@@ -7,3 +7,16 @@ resources:
   - services-nodeport.yaml
 
 namespace: networking
+
+secretGenerator:
+  - name: default-public-cert
+    options:
+      disableNameSuffixHash: true
+    namespace: networking
+    type: kubernetes.io/tls
+
+  - name: default-private-cert
+    options:
+      disableNameSuffixHash: true
+    namespace: networking
+    type: kubernetes.io/tls

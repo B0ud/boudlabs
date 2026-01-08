@@ -10,7 +10,7 @@ spec:
     - name: http
       port: 80
       protocol: HTTP
-      hostname: "*" # Accepte tout (le filtrage se fera via HAProxy ou HTTPRoute)
+      hostname: "*.boudboud.fr" # Accepte tout (le filtrage se fera via HAProxy ou HTTPRoute)
       allowedRoutes:
         namespaces:
           from: All
@@ -19,7 +19,7 @@ spec:
     - name: https
       port: 443
       protocol: HTTPS
-      hostname: "*"
+      hostname: "*.boudboud.fr"
       allowedRoutes:
         namespaces:
           from: All
