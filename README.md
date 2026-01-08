@@ -13,16 +13,16 @@ L'objectif est de sécuriser l'accès au serveur en n'exposant aucun port de man
 ## Table des Matières
 
 1. [Installation et Configuration de Proxmox](./docs/proxmox.md)
-   - Préparation hardware
-   - Installation de l'OS
-   - Configuration réseau (Linux Bridge)
+   - [Préparation hardware](./docs/proxmox.md#1-pré-requis)
+   - [Installation de l'OS](./docs/proxmox.md#2-installation)
+   - [Configuration réseau (Linux Bridge)](./docs/proxmox.md#3-configuration-post-installation)
    - [Sécurité Réseau (Firewall OVH)](./docs/ovh_firewall.md)
    - [Sécurité Locale (iptables / IPv6 Killswitch)](./docs/iptables.md)
    - [Personnalisation OS (Vim, etc.)](./docs/os_setup.md)
 2. [Mise en place de WireGuard](./docs/wireguard.md)
-   - Installation sur l'hôte Proxmox (pour l'accès d'urgence et management)
-   - Configuration des pairs (Clients)
-   - Règles de Pare-feu
+   - [Installation sur l'hôte Proxmox (pour l'accès d'urgence et management)](./docs/wireguard.md#1-installation-sur-le-serveur-proxmox)
+   - [Configuration des pairs (Clients)](./docs/wireguard.md#3-configuration)
+   - [Règles de Pare-feu](./docs/wireguard.md#4-mise-à-jour-du-firewall-critique)
 3. [Déploiement de Talos Linux](./docs/talos.md)
    - [Mise à jour Cluster (Talos & K8s)](./docs/cluster_upgrades.md)
    - [Dépannage & Commandes utiles](./docs/talos_talhelper.md)
