@@ -1,0 +1,11 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: jetstack-oci
+  namespace: cert-manager
+spec:
+  interval: 24h
+  # Le type OCI est indispensable ici
+  type: oci
+  # L'URL racine du registre de charts de Jetstack
+  url: oci://quay.io/jetstack/charts

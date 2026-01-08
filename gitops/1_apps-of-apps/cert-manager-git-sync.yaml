@@ -1,0 +1,12 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: apps-of-appscert-manager
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./gitops/2_cert-manager
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: apps-of-apps

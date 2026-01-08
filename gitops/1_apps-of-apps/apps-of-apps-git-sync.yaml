@@ -1,0 +1,26 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: apps-of-apps
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: main
+  secretRef:
+    name: flux-system
+  url: https://github.com/B0ud/boudlabs.git
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: apps-of-apps
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./gitops/1_apps-of-apps
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: apps-of-apps
