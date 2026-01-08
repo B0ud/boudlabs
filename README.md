@@ -36,3 +36,4 @@ L'objectif est de sécuriser l'accès au serveur en n'exposant aucun port de man
   - Découpage modulaire : `main.tf` (ressources), `variables.tf`, `outputs.tf`, `providers.tf`.
 - [GitOps avec FluxCD](./docs/gitops_flux.md)
   - [Installation Manuelle (Bootstrap CLI)](./docs/gitops_flux_manual.md)
+  - [Applications Installées (Gateway API, Cert-Manager)](./docs/gitops_apps.md)
