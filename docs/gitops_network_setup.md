@@ -40,3 +40,4 @@ Certificates are managed by `cert-manager` with a self-signed ClusterIssuer as a
 Traffic enters the cluster via NodePorts exposed on all worker nodes. These NodePorts will be the backend targets for the HAProxy Load Balancer.
 - **Service Name**: `cilium-gateway-public-nodeport` & `cilium-gateway-private-nodeport`
 - **Traffic Flow**: HAProxy -> Worker Node (NodePort) -> Cilium Gateway -> Pod
+- **Infrastructure Code**: `infrastructure/provisioning/modules/haproxy-vm`

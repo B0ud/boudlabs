@@ -33,7 +33,7 @@ L'objectif est de sécuriser l'accès au serveur en n'exposant aucun port de man
 ## Autres Ressources
 - [Modèle de Configuration Talos](./docs/talos_template.md)
 - [Déploiement Terraform (Infrastructure as Code)](./docs/terraform_proxmox.md)
-  - Découpage modulaire : `main.tf` (ressources), `variables.tf`, `outputs.tf`, `providers.tf`.
+  - Organisation modulaire : `provisioning/` (Root) appelle les modules `talos-cluster` et `haproxy-vm`.
 - [GitOps avec FluxCD](./docs/gitops_flux.md)
   - [Installation Manuelle (Bootstrap CLI)](./docs/gitops_flux_manual.md)
   - [Applications Installées (Gateway API, Cert-Manager)](./docs/gitops_apps.md)

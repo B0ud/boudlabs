@@ -1,0 +1,53 @@
+---
+- name: Setup HAProxy & Security
+  hosts: loadbalancer
+  become: true
+  vars:
+    # Ton réseau VPN + Réseau local
+    vpn_subnet: "192.168.50.0/24 10.0.0.0/8"
+    k8s_worker_ips:
+      - "192.168.50.120"
+      - "192.168.50.121"
+      - "192.168.50.122"
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install HAProxy & Tools
+      apt:
+        name: [haproxy, curl, gnupg, rsyslog]
+        state: latest
+
+    - name: Deploy HAProxy config
+      template:
+        src: haproxy.cfg.j2
+        dest: /etc/haproxy/haproxy.cfg
+        validate: haproxy -c -f %s
+      notify: Restart HAProxy
+
+    # --- CROWDSEC ---
+    - name: Add CrowdSec repo
+      shell: curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.deb.sh | bash
+      args:
+        creates: /etc/apt/sources.list.d/crowdsec_crowdsec.list
+
+    - name: Install CrowdSec & Bouncer
+      apt:
+        name: [crowdsec, crowdsec-firewall-bouncer-iptables]
+        state: latest
+
+    - name: Ensure CrowdSec detects HAProxy
+      command: cscli collections install crowdsec/haproxy
+      register: cscli
+      changed_when: "'Example' not in cscli.stdout"
+      ignore_errors: yes
+      notify: Reload CrowdSec
+
+  handlers:
+    - name: Restart HAProxy
+      service: { name: haproxy, state: restarted }
+    - name: Reload CrowdSec
+      systemd: { name: crowdsec, state: reloaded }

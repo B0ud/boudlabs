@@ -104,13 +104,13 @@ resource "proxmox_vm_qemu" "talos_nodes" {
 resource "terraform_data" "talhelper_gen" {
   # Si talconfig.yaml change, on régénère tout
   triggers_replace = [
-    filesha256("../talos/talconfig.yaml")
+    filesha256("${path.module}/../../../../talos/talconfig.yaml")
   ]
 
   provisioner "local-exec" {
-    command = "talhelper genconfig -c ../talos/talconfig.yaml -s ../talos/talsecret.sops.yaml -o ../talos/clusterconfig"
+    command = "talhelper genconfig -c ../../talos/talconfig.yaml -s ../../talos/talsecret.sops.yaml -o ../../talos/clusterconfig"
     environment = {
-      SOPS_AGE_KEY_FILE = abspath("../talos/age.key.txt")
+      SOPS_AGE_KEY_FILE = abspath("../../talos/age.key.txt")
     }
     # Working dir stays default (infrastructure), we use relative paths in command
   }
@@ -123,13 +123,13 @@ data "local_file" "machine_configs" {
 
   depends_on = [terraform_data.talhelper_gen]
   # Assure-toi que talhelper génère bien les noms sous la forme : proxmox-cluster-<nom-du-noeud>.yaml
-  filename = "${path.module}/../talos/clusterconfig/proxmox-cluster-${each.key}.yaml"
+  filename = "${path.module}/../../../../talos/clusterconfig/proxmox-cluster-${each.key}.yaml"
 }
 
 # On charge le talosconfig (nécessaire pour parler au cluster)
 data "local_file" "talosconfig" {
   depends_on = [terraform_data.talhelper_gen]
-  filename   = "${path.module}/../talos/clusterconfig/talosconfig"
+  filename   = "${path.module}/../../../../talos/clusterconfig/talosconfig"
 }
 
 # 3. Application de la configuration (remplace "taloctl apply-config")
@@ -177,36 +177,8 @@ resource "talos_cluster_kubeconfig" "kubeconfig" {
   node = local.nodes["master-01"].ip
 }
 
-resource "helm_release" "cilium" {
-  name       = "cilium"
-  repository = "https://helm.cilium.io/"
-  chart      = "cilium"
-  version    = "1.18.5"
-  namespace  = "kube-system"
 
-  values = [
-    file("${path.module}/../kubernetes/cilium/values.yaml")
-  ]
-}
 
-check "cluster_health" {
-  data "http" "kube_api_health" {
-    url      = "https://192.168.50.100:6443/livez"
-    insecure = true
-    retry {
-      attempts     = 10
-      min_delay_ms = 1000
-      max_delay_ms = 5000
-    }
-  }
-
-  assert {
-    # 200 = OK (Anonymous Auth activé)
-    # 401 = Unauthorized (API UP mais Auth requise, ce qui est normal pour Talos sécurisé)
-    condition     = contains([200, 401, 403], data.http.kube_api_health.status_code)
-    error_message = "L'API Kubernetes n'est pas joignable (Status différent de 200/401/403). VIP: 192.168.50.100"
-  }
-}
 
 #resource "flux_bootstrap_git" "this" {
 #  depends_on = [helm_release.cilium]

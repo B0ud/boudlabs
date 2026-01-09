@@ -18,16 +18,19 @@ Nous utilisons l'Infrastructure as Code (IaC) pour créer et gérer les VMs Prox
 
 ## 2. Structure du Projet
 
-Le code est séparé en deux dossiers pour suivre les bonnes pratiques (Infrastructure vs Configuration) :
-**`infrastructure/`** : Code Terraform pour provisionner les VMs Proxmox.
-**`talos/`** : Configuration Talos (Talhelper) pour générer les secrets et la config Kubernetes.
+Le code est structuré de manière modulaire :
 
-*   `infrastructure/main.tf` : Définition des **resources** principales (VMs Proxmox, Talos bootstrap, Helm release). C'est le cœur de l'infrastructure.
-*   `infrastructure/variables.tf` : Déclaration de toutes les **variables** d'entrée (credentials, noms, etc.). Permet de paramétrer le code sans le modifier.
-*   `infrastructure/outputs.tf` : Définition des **sorties** (valeurs retournées après l'exécution), comme le `kubeconfig` ou les IPs des nœuds.
-*   `infrastructure/providers.tf` : Configuration des **providers** Terraform (Proxmox, Talos, Helm, Flux). C'est ici qu'on configure les accès aux APIs externes.
-*   `infrastructure/versions.tf` : Fixe les **versions** de Terraform et des providers pour assurer la stabilité et éviter les breaking changes.
-*   `infrastructure/terraform.tfvars` : **Ficher Secret** contenant les valeurs réelles des variables. **NE JAMAIS LE COMMITTER**.
+**`infrastructure/`** : Infrastructure as Code et Configuration.
+*   **`provisioning/`** : **Module Racine (Root)**. C'est ici que vous lancez Terraform/Tofu.
+    *   `main.tf` : Orchestrateur qui appelle les modules.
+    *   `variables.tf` : Variables globales.
+    *   `modules/talos-cluster/` : Module de gestion du Cluster Talos.
+    *   `modules/haproxy-vm/` : Module de gestion du Load Balancer HAProxy.
+*   **`configuration/`** : Configuration "Day 2" (Ansible, etc.).
+
+**`talos/`** : Configuration Talos (Talhelper).
+
+*   `infrastructure/provisioning/terraform.tfvars` : **Ficher Secret** contenant les valeurs réelles des variables. **NE JAMAIS LE COMMITTER**.
 *   `talos/talconfig.yaml` : Configuration unique de votre cluster Talos.
 
 ## 3. Configuration Initiale
@@ -43,7 +46,7 @@ proxmox_user     = "root@pam"
 
 ### 3.2 Initialiser le projet
 
-Dans le dossier contenant `main.tf` :
+Dans le dossier `infrastructure/provisioning` :
 
 ```bash
 tofu init
@@ -128,7 +131,7 @@ Une fois le `tofu apply` terminé avec succès, le cluster est prêt. Cependant,
 
 ### 7.1 Récupérer les fichiers de configuration
 
-Exécutez ces commandes dans votre terminal (dossier `infrastructure`) pour extraire les fichiers :
+Exécutez ces commandes dans votre terminal (dossier `infrastructure/provisioning`) pour extraire les fichiers :
 
 ```bash
 # Extraire le kubeconfig (pour kubectl)
