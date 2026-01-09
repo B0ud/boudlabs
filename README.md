@@ -37,3 +37,6 @@ L'objectif est de sécuriser l'accès au serveur en n'exposant aucun port de man
 - [GitOps avec FluxCD](./docs/gitops_flux.md)
   - [Installation Manuelle (Bootstrap CLI)](./docs/gitops_flux_manual.md)
   - [Applications Installées (Gateway API, Cert-Manager)](./docs/gitops_apps.md)
+  - [Architecture Réseau & Gateway API](./docs/gitops_network_setup.md)
+- [Modèles de VM Proxmox](./docs/proxmox_templates-ha-proxy.md)
+  - Création du Template Debian 13 pour HAProxy
