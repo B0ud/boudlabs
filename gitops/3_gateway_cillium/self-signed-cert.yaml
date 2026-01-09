@@ -1,0 +1,42 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: public-fallback-cert
+  namespace: networking # IMPORTANT: Dans le même namespace que la Gateway
+spec:
+  secretName: default-public-cert # <--- Le nom exact que la Gateway va chercher
+  commonName: "default-public-fallback"
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: private-fallback-cert
+  namespace: networking
+spec:
+  secretName: default-private-cert # <--- Le nom exact que la Gateway va chercher
+  commonName: "default-private-fallback"
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
