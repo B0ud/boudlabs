@@ -16,7 +16,7 @@ module "haproxy_vm" {
   source = "./modules/haproxy-vm"
 
   target_node   = "boudlabs"
-  template_name = "talos-template-factory" # Or "debian-13-trixie-template" if distinct
+  template_name = "debian-13-trixie-template" # Changed from talos-template-factory to ensure standard Linux access
   gateway_ip    = "192.168.50.1"
   haproxy_ip    = "192.168.50.200"
   worker_ips    = module.talos_cluster.worker_ips
@@ -45,6 +45,9 @@ output "kubeconfig" {
 
 output "haproxy_ip" {
   value = module.haproxy_vm.ha_proxy_ip
+}
+output "worker_ips" {
+  value = module.talos_cluster.worker_ips
 }
 
 check "cluster_health" {

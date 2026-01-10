@@ -45,27 +45,27 @@ frontend main_triage
 backend k8s_public_http
     mode tcp
     balance roundrobin
-    {% for ip in k8s_worker_ips %}
+    {% for ip in worker_ips %}
     server w{{ loop.index }} {{ ip }}:30080 check
     {% endfor %}
 
 backend k8s_public_https
     mode tcp
     balance roundrobin
-    {% for ip in k8s_worker_ips %}
+    {% for ip in worker_ips %}
     server w{{ loop.index }} {{ ip }}:30443 check
     {% endfor %}
 
 backend k8s_private_http
     mode tcp
     balance roundrobin
-    {% for ip in k8s_worker_ips %}
+    {% for ip in worker_ips %}
     server w{{ loop.index }} {{ ip }}:31080 check
     {% endfor %}
 
 backend k8s_private_https
     mode tcp
     balance roundrobin
-    {% for ip in k8s_worker_ips %}
+    {% for ip in worker_ips %}
     server w{{ loop.index }} {{ ip }}:31443 check
     {% endfor %}

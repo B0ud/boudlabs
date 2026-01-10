@@ -21,6 +21,7 @@ resource "proxmox_vm_qemu" "haproxy" {
     storage = "local"
     type    = "disk"
     size    = "20G"
+    format  = "qcow2"
   }
 
   disk {
@@ -28,6 +29,14 @@ resource "proxmox_vm_qemu" "haproxy" {
     type    = "cloudinit"
     storage = "local"
   }
+
+  # Tu peux garder ça si tu veux, ou l'enlever. 
+  # Le laisser permet d'avoir le VNC ET les logs série si besoin.
+  serial {
+    id   = 0
+    type = "socket"
+  }
+
 
   os_type = "cloud-init"
 
@@ -45,22 +54,14 @@ resource "proxmox_vm_qemu" "haproxy" {
   }
 
   provisioner "remote-exec" {
-    inline = [
-      "sudo apt-get update",
-      "sudo apt-get install -y haproxy",
-    ]
+    inline = ["echo 'SSH is up!'"]
+
+    connection {
+      type        = "ssh"
+      user        = "root"
+      private_key = file("~/.ssh/id_ed25519") # Chemin vers TA clé privée sur la machine qui lance Tofu
+      host        = self.default_ipv4_address
+    }
   }
 
-  # Provision the templated config
-  provisioner "file" {
-    content     = templatefile("${path.module}/haproxy.cfg.tftpl", { worker_ips = var.worker_ips })
-    destination = "/tmp/haproxy.cfg"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo mv /tmp/haproxy.cfg /etc/haproxy/haproxy.cfg",
-      "sudo systemctl restart haproxy"
-    ]
-  }
 }
