@@ -34,5 +34,5 @@ variable "ha_proxy_vm_password" {
 }
 
 variable "ssh_public_key" {
-  type = string
+  type = list(string)
 }

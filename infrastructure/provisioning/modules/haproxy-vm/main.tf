@@ -68,9 +68,9 @@ resource "proxmox_vm_qemu" "haproxy" {
   # Utilisateur et Auth
   ciuser     = var.ha_proxy_vm_user
   cipassword = var.ha_proxy_vm_password
-  # On injecte ta clé publique (définie dans variables.tf)
+  # On injecte tes clés publiques (définies dans variables.tf)
   sshkeys = <<EOF
-  ${var.ssh_public_key}
+  ${join("\n", var.ssh_public_key)}
   EOF
 
   # --- ATTENTE DU DÉMARRAGE (SSH CHECK) ---

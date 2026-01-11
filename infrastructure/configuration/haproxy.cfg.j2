@@ -26,17 +26,19 @@ frontend main_triage
     bind *:443
     mode tcp
     
-    tcp-request inspect-delay 5s
-    tcp-request content accept if { req_ssl_hello_type 1 }
+    # ❌ LIGNES SUPPRIMÉES POUR ÉVITER LE LAG SUR LE PORT 80
+    # On n'a pas besoin d'inspecter le SSL car on route selon le PORT, pas le DOMAINE.
+    # tcp-request inspect-delay 5s
+    # tcp-request content accept if { req_ssl_hello_type 1 }
 
     # ACL VPN
     acl source_is_vpn src {{ vpn_subnet }}
 
-    # Routage HTTPS
+    # Routage HTTPS (Port 443)
     use_backend k8s_private_https if source_is_vpn { dst_port 443 }
     use_backend k8s_public_https  if { dst_port 443 }
     
-    # Routage HTTP
+    # Routage HTTP (Port 80)
     use_backend k8s_private_http  if source_is_vpn { dst_port 80 }
     default_backend k8s_public_http
 
@@ -45,6 +47,7 @@ frontend main_triage
 backend k8s_public_http
     mode tcp
     balance roundrobin
+    # 👇 On s'assure que la variable est bien 'worker_ips'
     {% for ip in worker_ips %}
     server w{{ loop.index }} {{ ip }}:30080 check
     {% endfor %}

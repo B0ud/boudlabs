@@ -41,6 +41,6 @@ variable "ha_proxy_vm_password" {
 }
 
 variable "ssh_public_key" {
-  description = "Public SSH key to inject into VMs"
-  type        = string
+  description = "List of Public SSH keys to inject into VMs"
+  type        = list(string)
 }

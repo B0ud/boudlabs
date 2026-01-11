@@ -40,20 +40,23 @@ echo -e "${CYAN}🚀 Copie des fichiers vers Proxmox...${NC}"
 cd .. # Infrastructure
 pwd
 
-# 1. Créer le dossier distant (s'il n'existe pas)
-ssh $PROXMOX_HOST "mkdir -p $REMOTE_DIR"
+# 1. Nettoyer et recréer le dossier distant
+ssh $PROXMOX_HOST "rm -rf $REMOTE_DIR/configuration && mkdir -p $REMOTE_DIR"
 
 # 2. Copier le dossier 'configuration' (Ansible) vers Proxmox
-# Le '/' à la fin de configuration/ est important pour copier le contenu
-scp -r configuration/ $PROXMOX_HOST:$REMOTE_DIR/configuration
+scp -r configuration $PROXMOX_HOST:$REMOTE_DIR/
 
 # --- PHASE 3 : EXÉCUTION DISTANTE ---
+echo -e "${CYAN}🔑 Trusting HAProxy Host Key on Proxmox...${NC}"
+# On supprime l'ancienne clé (si elle existe) et on scanne la nouvelle pour l'ajouter aux known_hosts
+ssh $PROXMOX_HOST "ssh-keygen -f ~/.ssh/known_hosts -R $LB_IP ; ssh-keyscan -H $LB_IP >> ~/.ssh/known_hosts"
+
 echo -e "${CYAN}⚙️  Lancement d'Ansible SUR Proxmox...${NC}"
 
 # On construit la commande à envoyer via SSH.
 # Attention aux échappements (\) pour que le JSON arrive intact.
 SSH_CMD="cd $REMOTE_DIR/configuration && \
-ansible-playbook -i '$LB_IP,' deploy_haproxy.yml \
+ansible-playbook -i inventory.ini deploy_haproxy.yml \
 --extra-vars '{\"worker_ips\": $WORKERS_JSON}'"
 
 # Exécution

@@ -5,10 +5,7 @@
   vars:
     # Ton réseau VPN + Réseau local
     vpn_subnet: "192.168.50.0/24 10.0.0.0/8"
-    worker_ips:
-      - "192.168.50.120"
-      - "192.168.50.121"
-      - "192.168.50.122"
+    worker_ips: "{{ worker_ips | default(['192.168.50.120', '192.168.50.121', '192.168.50.122']) }}"
 
   tasks:
     - name: Update apt cache
@@ -18,8 +15,15 @@
 
     - name: Install HAProxy & Tools
       apt:
-        name: [haproxy, curl, gnupg, rsyslog]
+        name: [haproxy, curl, gnupg, rsyslog, console-setup]
         state: latest
+
+    - name: Configure keyboard layout to FR
+      lineinfile:
+        path: /etc/default/keyboard
+        regexp: "^XKBLAYOUT="
+        line: 'XKBLAYOUT="fr"'
+      notify: Reload Keyboard
 
     - name: Deploy HAProxy config
       template:
@@ -36,11 +40,11 @@
 
     - name: Install CrowdSec & Bouncer
       apt:
-        name: [crowdsec, crowdsec-firewall-bouncer-iptables]
+        name: [crowdsec, crowdsec-firewall-bouncer]
         state: latest
 
     - name: Ensure CrowdSec detects HAProxy
-      command: cscli collections install crowdsec/haproxy
+      command: cscli collections install crowdsecurity/haproxy
       register: cscli
       changed_when: "'Example' not in cscli.stdout"
       ignore_errors: yes
@@ -51,3 +55,6 @@
       service: { name: haproxy, state: restarted }
     - name: Reload CrowdSec
       systemd: { name: crowdsec, state: reloaded }
+
+    - name: Reload Keyboard
+      service: { name: console-setup, state: restarted }
