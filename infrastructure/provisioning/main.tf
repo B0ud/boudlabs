@@ -20,6 +20,10 @@ module "haproxy_vm" {
   gateway_ip    = "192.168.50.1"
   haproxy_ip    = "192.168.50.200"
   worker_ips    = module.talos_cluster.worker_ips
+
+  ha_proxy_vm_user     = var.ha_proxy_vm_user
+  ha_proxy_vm_password = var.ha_proxy_vm_password
+  ssh_public_key       = var.ssh_public_key
 }
 
 resource "helm_release" "cilium" {

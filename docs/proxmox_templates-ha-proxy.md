@@ -11,21 +11,24 @@ This guide details how to manually create a Debian 13 (Trixie) Cloud-Init capabl
 Open a shell on your Proxmox node (via SSH or the Web Console).
 
 ### 2. Download the Image
-Download the latest Debian 13 Cloud image (Trixie).
+Download the latest Debian 13 "Generic Cloud" image (Trixie).
+> [!IMPORTANT]
+> Do NOT use the `nocloud` image as it may lack the `cloud-init` package. Use `genericcloud` instead.
+
 ```bash
-wget https://cloud.debian.org/images/cloud/trixie/latest/debian-13-nocloud-amd64.qcow2
+wget https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-amd64.qcow2
 ```
 
 ### 3. Create the VM
 Create a new VM with the ID `9001`.
 ```bash
-qm create 9001 --name "debian-13-trixie-template" --memory 2048 --net0 virtio,bridge=vmbr0
+qm create 9001 --name "debian-13-trixie-template" --memory 2048 --net0 virtio,bridge=vmbr1
 ```
 
 ### 4. Import the Disk
 Import the downloaded QCOW2 image into the local storage.
 ```bash
-qm importdisk 9001 debian-13-nocloud-amd64.qcow2 local --format qcow2
+qm importdisk 9001 debian-13-genericcloud-amd64.qcow2 local --format qcow2
 ```
 
 ### 5. Attach the Disk
@@ -56,7 +59,7 @@ qm template 9001
 ### 9. Cleanup
 Remove the downloaded image to save space.
 ```bash
-rm debian-13-nocloud-amd64.qcow2
+rm debian-13-genericcloud-amd64.qcow2
 ```
 
 ---

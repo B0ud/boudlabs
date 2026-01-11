@@ -28,3 +28,19 @@ variable "github_branch" {
   type    = string
   default = "main"
 }
+
+variable "ha_proxy_vm_user" {
+  description = "User for HAProxy VM"
+  type        = string
+}
+
+variable "ha_proxy_vm_password" {
+  description = "Password for HAProxy VM"
+  type        = string
+  sensitive   = true
+}
+
+variable "ssh_public_key" {
+  description = "Public SSH key to inject into VMs"
+  type        = string
+}

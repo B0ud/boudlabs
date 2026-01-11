@@ -23,3 +23,16 @@ variable "worker_ips" {
   description = "List of Worker Node IPs to load balance"
   type        = list(string)
 }
+
+variable "ha_proxy_vm_user" {
+  type = string
+}
+
+variable "ha_proxy_vm_password" {
+  type      = string
+  sensitive = true
+}
+
+variable "ssh_public_key" {
+  type = string
+}

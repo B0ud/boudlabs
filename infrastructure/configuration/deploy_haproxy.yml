@@ -1,6 +1,6 @@
 ---
 - name: Setup HAProxy & Security
-  hosts: loadbalancer
+  hosts: haproxy
   become: true
   vars:
     # Ton réseau VPN + Réseau local
