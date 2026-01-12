@@ -33,10 +33,23 @@
       notify: Restart HAProxy
 
     # --- CROWDSEC ---
-    - name: Add CrowdSec repo
-      shell: curl -s https://packagecloud.io/install/repositories/crowdsec/crowdsec/script.deb.sh | bash
-      args:
-        creates: /etc/apt/sources.list.d/crowdsec_crowdsec.list
+    - name: Download CrowdSec GPG key
+      get_url:
+        url: https://packagecloud.io/crowdsec/crowdsec/gpgkey
+        dest: /usr/share/keyrings/crowdsec_crowdsec-archive-keyring.asc
+        mode: '0644'
+        force: true
+
+    - name: Remove incompatible CrowdSec repo list (Trixie cleanup)
+      file:
+        path: /etc/apt/sources.list.d/crowdsec_crowdsec.list
+        state: absent
+
+    - name: Add CrowdSec Repository (Bookworm compat)
+      apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/crowdsec_crowdsec-archive-keyring.asc] https://packagecloud.io/crowdsec/crowdsec/debian/ bookworm main"
+        state: present
+        filename: crowdsec_crowdsec
 
     - name: Install CrowdSec & Bouncer
       apt:

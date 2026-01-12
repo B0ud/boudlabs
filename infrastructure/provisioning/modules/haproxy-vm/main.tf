@@ -5,13 +5,15 @@ resource "proxmox_vm_qemu" "haproxy" {
   full_clone  = true
 
   # --- RESSOURCES SYSTÈME ---
-  agent   = 1 # Nécessaire pour que Proxmox remonte l'IP à Tofu
-  cores   = 2
-  sockets = 1
-  memory  = 2048
-  scsihw  = "virtio-scsi-pci"
-  boot    = "order=scsi0;ide2"
+  agent  = 1 # Nécessaire pour que Proxmox remonte l'IP à Tofu
+  memory = 2048
+  scsihw = "virtio-scsi-pci"
+  boot   = "order=scsi0;ide2"
 
+  cpu {
+    cores   = 2
+    sockets = 1
+  }
   # --- CONFIGURATION GRAPHIQUE ---
   # Utile si tu veux accéder à la console "NoVNC" via Proxmox en secours
   vga {
