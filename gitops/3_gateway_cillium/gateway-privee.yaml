@@ -3,6 +3,8 @@ kind: Gateway
 metadata:
   name: gateway-privee
   namespace: default
+  annotations:
+    io.cilium/service-type: ClusterIP
 spec:
   gatewayClassName: cilium
   listeners:
