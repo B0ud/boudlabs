@@ -6,8 +6,37 @@
     # Ton réseau VPN + Réseau local
     vpn_subnet: "192.168.50.0/24 10.0.0.0/8"
     worker_ips: "{{ worker_ips | default(['192.168.50.120', '192.168.50.121', '192.168.50.122']) }}"
-
+    # L'IP vers laquelle le DNS *.private.local doit pointer (Ton HAProxy)
+    haproxy_bind_ip: "192.168.50.200"
   tasks:
+    - name: Ensure DNS is working (Fix for missing systemd-resolved)
+      copy:
+        dest: /etc/resolv.conf
+        content: "nameserver 1.1.1.1\nnameserver 8.8.8.8"
+        force: yes
+
+    - name: Remove resolvconf (conflicts with manual setup)
+      apt:
+        name: resolvconf
+        state: absent
+
+    - name: Configure dnsmasq to ignore resolvconf (Silence logs)
+      lineinfile:
+        path: /etc/default/dnsmasq
+        regexp: '^IGNORE_RESOLVCONF='
+        line: 'IGNORE_RESOLVCONF=yes'
+        create: yes
+      notify: Restart Dnsmasq
+
+    # --- FIX CONFLIT PORT 53 ---
+    # Moved BEFORE install to ensure port 53 is free when dnsmasq starts
+    - name: Disable systemd-resolved to free port 53
+      service:
+        name: systemd-resolved
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
     - name: Update apt cache
       apt:
         update_cache: yes
@@ -15,7 +44,7 @@
 
     - name: Install HAProxy & Tools
       apt:
-        name: [haproxy, curl, gnupg, rsyslog, console-setup]
+        name: [haproxy, curl, gnupg, rsyslog, console-setup, dnsmasq]
         state: latest
 
     - name: Configure keyboard layout to FR
@@ -31,6 +60,16 @@
         dest: /etc/haproxy/haproxy.cfg
         validate: haproxy -c -f %s
       notify: Restart HAProxy
+
+    # --- DNSMASQ (Split-Horizon) ---
+    - name: Configure DNS wildcard for .private.local
+      copy:
+        dest: /etc/dnsmasq.d/homelab.conf
+        content: |
+          # Redirection de tout le domaine *.private.local vers HAProxy
+          address=/.private.local/{{ haproxy_bind_ip }}
+        mode: '0644'
+      notify: Restart Dnsmasq
 
     # --- CROWDSEC ---
     - name: Download CrowdSec GPG key
@@ -66,6 +105,10 @@
   handlers:
     - name: Restart HAProxy
       service: { name: haproxy, state: restarted }
+
+    - name: Restart Dnsmasq
+      service: { name: dnsmasq, state: restarted }
+
     - name: Reload CrowdSec
       systemd: { name: crowdsec, state: reloaded }
 
