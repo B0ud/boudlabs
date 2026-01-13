@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.cilium.io/src-ranges-policy: Allow
+  labels:
+    gateway.networking.k8s.io/gateway-name: gateway-privee
+    io.cilium.gateway/owning-gateway: gateway-privee
+  name: cilium-gateway-gateway-privee
+  namespace: networking
+  ownerReferences:
+    - apiVersion: gateway.networking.k8s.io/v1
+      controller: true
+      kind: Gateway
+      name: gateway-privee
+      uid: 320ed064-d8bb-4c43-a3d9-2ca96eb03d32
+  resourceVersion: "3142811"
+  uid: 4a964425-713b-4695-a3ea-14dce35d178f
+spec:
+  clusterIP: 10.98.18.48
+  clusterIPs:
+    - 10.98.18.48
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: port-80
+      nodePort: 31080
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: port-443
+      nodePort: 31443
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.cilium.io/src-ranges-policy: Allow
+  creationTimestamp: "2026-01-12T20:50:43Z"
+  labels:
+    gateway.networking.k8s.io/gateway-name: gateway-public
+    io.cilium.gateway/owning-gateway: gateway-public
+  name: cilium-gateway-gateway-public
+  namespace: networking
+  ownerReferences:
+    - apiVersion: gateway.networking.k8s.io/v1
+      controller: true
+      kind: Gateway
+      name: gateway-public
+      uid: 0aff823c-898f-4974-abae-74b76bd22b80
+  resourceVersion: "3141592"
+  uid: fb2bb570-97af-43b3-9ef8-ca2762560912
+spec:
+  clusterIP: 10.101.182.25
+  clusterIPs:
+    - 10.101.182.25
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: port-80
+      nodePort: 30080
+      port: 80
+      protocol: TCP
+      targetPort: 80
+    - name: port-443
+      nodePort: 30443
+      port: 443
+      protocol: TCP
+      targetPort: 443
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
