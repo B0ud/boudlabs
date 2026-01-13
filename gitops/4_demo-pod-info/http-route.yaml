@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: podinfo-route
+  namespace: demo-prive
+spec:
+  parentRefs:
+    # On s'attache à la Gateway Privée qui est dans le namespace 'networking'
+    - name: gateway-privee
+      namespace: networking
+  hostnames:
+    - "demo.private.local"
+  rules:
+    - backendRefs:
+        - name: podinfo
+          port: 9898

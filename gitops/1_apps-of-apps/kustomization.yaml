@@ -5,3 +5,4 @@ resources:
   - apps-of-apps-git-sync.yaml
   - cert-manager-git-sync.yaml
   - gateway_cillium-git-sync.yaml
+  - demo-pod-info.yaml
