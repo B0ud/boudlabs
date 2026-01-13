@@ -4,7 +4,7 @@ resources:
   - namespace.yaml
   - gateway-public.yaml
   - gateway-privee.yaml
-  - services-nodeport.yaml
+  #  - services-nodeport.yaml
   - user-gateway-class.yaml
   - self-signed-cert.yaml
 
