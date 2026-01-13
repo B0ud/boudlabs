@@ -2,11 +2,8 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: gateway-privee
-  namespace: default
-  annotations:
-    io.cilium/service-type: ClusterIP
 spec:
-  gatewayClassName: cilium
+  gatewayClassName: cilium-nodeport
   listeners:
     # --- ÉCOUTE HTTP PRIVÉE ---
     - name: http
