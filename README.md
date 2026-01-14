@@ -39,5 +39,6 @@ L'objectif est de sécuriser l'accès au serveur en n'exposant aucun port de man
   - [Applications Installées (Gateway API, Cert-Manager)](./docs/gitops_apps.md)
   - [Architecture Réseau & Gateway API](./docs/gitops_network_setup.md)
   - [Guide Complet: Gateway API & NodePorts Statiques](./docs/cilium-gateway-setup.md)
+  - [Guide Configuration Accès Public (DNS & Proxmox Cloud)](./docs/public_access_guide.md)
 - [Modèles de VM Proxmox](./docs/proxmox_templates-ha-proxy.md)
   - Création du Template Debian 13 pour HAProxy

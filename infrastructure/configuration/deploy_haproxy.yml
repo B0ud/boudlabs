@@ -19,6 +19,7 @@
       apt:
         name: resolvconf
         state: absent
+        purge: yes
 
     - name: Configure dnsmasq to ignore resolvconf (Silence logs)
       lineinfile:
@@ -44,7 +45,7 @@
 
     - name: Install HAProxy & Tools
       apt:
-        name: [haproxy, curl, gnupg, rsyslog, console-setup, dnsmasq]
+        name: [haproxy, curl, gnupg, rsyslog, console-setup, dnsmasq, dnsutils]
         state: latest
 
     - name: Configure keyboard layout to FR
