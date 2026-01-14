@@ -103,7 +103,21 @@
       ignore_errors: yes
       notify: Reload CrowdSec
 
+# --- FIX VPN ACCESS (Corrige l'erreur "ignoring query from non-local") ---
+    - name: Disable Dnsmasq local-service restriction (Allow VPN)
+      replace:
+        path: /usr/share/dnsmasq/init-system-common
+        regexp: '--local-service'
+        replace: ''
+      notify:
+        - Reload Systemd
+        - Restart Dnsmasq
+
   handlers:
+    - name: Reload Systemd
+      systemd:
+        daemon_reload: yes
+
     - name: Restart HAProxy
       service: { name: haproxy, state: restarted }
 
