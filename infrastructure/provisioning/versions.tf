@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/helm"
       version = "3.1.1"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.2.3"
+    }
     #flux = {
     #  source  = "fluxcd/flux"
     #  version = "1.7.6"

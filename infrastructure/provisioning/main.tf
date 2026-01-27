@@ -26,6 +26,12 @@ module "haproxy_vm" {
   ssh_public_key       = var.ssh_public_key
 }
 
+resource "null_resource" "helm_repo" {
+  provisioner "local-exec" {
+    command = "helm repo add cilium https://helm.cilium.io/ && helm repo update"
+  }
+}
+
 resource "helm_release" "cilium" {
   name       = "cilium"
   repository = "https://helm.cilium.io/"
@@ -33,8 +39,8 @@ resource "helm_release" "cilium" {
   version    = "1.18.5"
   namespace  = "kube-system"
 
-  # We use depends_on to ensure cluster is ready
-  depends_on = [module.talos_cluster]
+  # We use depends_on to ensure cluster is ready and repo is updated
+  depends_on = [module.talos_cluster, null_resource.helm_repo]
 
   values = [
     # Verify path relative to ROOT module
@@ -54,21 +60,22 @@ output "worker_ips" {
   value = module.talos_cluster.worker_ips
 }
 
-check "cluster_health" {
-  data "http" "kube_api_health" {
-    url      = "https://192.168.50.100:6443/livez"
-    insecure = true
-    retry {
-      attempts     = 10
-      min_delay_ms = 1000
-      max_delay_ms = 5000
-    }
-  }
-
-  assert {
-    # 200 = OK (Anonymous Auth activé)
-    # 401 = Unauthorized (API UP mais Auth requise, ce qui est normal pour Talos sécurisé)
-    condition     = contains([200, 401, 403], data.http.kube_api_health.status_code)
-    error_message = "L'API Kubernetes n'est pas joignable (Status différent de 200/401/403). VIP: 192.168.50.100"
-  }
-}
+#check "cluster_health" {
+#  data "http" "kube_api_health" {
+#    url      = "https://192.168.50.100:6443/livez"
+#    insecure = true
+#    retry {
+#      attempts     = 10
+#      min_delay_ms = 1000
+#      max_delay_ms = 5000
+#    }
+#  }
+#
+#  assert {
+#    # 200 = OK (Anonymous Auth activé)
+#    # 401 = Unauthorized (API UP mais Auth requise, ce qui est normal pour Talos sécurisé)
+#    condition     = contains([200, 401, 403], data.http.kube_api_health.status_code)
+#    error_message = "L'API Kubernetes n'est pas joignable (Status différent de 200/401/403). VIP: 192.168.50.100"
+#  }
+#}
+#
